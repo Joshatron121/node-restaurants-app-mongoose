@@ -17,8 +17,15 @@ app.use(bodyParser.json());
 
 // GET requests to /restaurants => return 10 restaurants
 app.get('/restaurants', (req, res) => {
+  const filters = {};
+  const queryableFields = ['cuisine', 'borough'];
+  queryableFields.forEach(field => {
+    if(req.query[field]) {
+      filters[field] = req.query[field];
+    }
+  });
   Restaurant
-    .find()
+    .find(filters)
     // we're limiting because restaurants db has > 25,000
     // documents, and that's too much to process/return
     .limit(10)
@@ -47,7 +54,7 @@ app.get('/restaurants/:id', (req, res) => {
     // by the object _id property
     .findById(req.params.id)
     .exec()
-    .then(restaurant =>res.json(restaurant.apiRepr()))
+    .then(restaurant => res.json(restaurant.apiRepr()))
     .catch(err => {
       console.error(err);
         res.status(500).json({message: 'Internal server error'})
